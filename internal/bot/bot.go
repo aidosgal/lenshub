@@ -250,19 +250,22 @@ func (tg *TgBot) handleCallbackQuery(callbackQuery *tgbotapi.CallbackQuery) {
         response := tgbotapi.NewMessage(chatID, portfolioMsg)
         tg.bot.Send(response)
 
-    case data == "specialization_videographer" || data == "specialization_photographer":
+    case data == "specialization_videographer" || data == "specialization_photographer" || 
+         data == "specialization_motion_designer" || data == "specialization_graphic_designer":
         userData.Specialization = map[string]string{
-            "specialization_videographer": "Видеооператор",
-            "specialization_photographer": "Фотограф",
-        }[data]
-        
+            "specialization_videographer":    "Видеооператор",
+            "specialization_photographer":    "Фотограф",
+            "specialization_motion_designer": "Motion Дизайнер",
+            "specialization_graphic_designer": "Графический Дизайнер",
+        }[data]        
+
         go tg.completeExecutorRegistration(chatID, userData)    
     case data == "create_order":
         tg.startOrderCreation(chatID)
     case strings.HasPrefix(data, "respond_to_order:"):
         orderID := strings.Split(data, ":")[1]
         tg.handleOrderResponse(chatID, orderID)
-    case data == "order_spec_videographer" || data == "order_spec_photographer":
+    case data == "order_spec_videographer" || data == "order_spec_photographer" || data == "order_spec_graph_designer" || data == "order_spec_motion_designer":
         tg.handleOrderSpecializationSelection(chatID, data)
     }
 }
@@ -282,6 +285,10 @@ func (tg *TgBot) startOrderCreation(chatID int64) {
         {
             tgbotapi.NewInlineKeyboardButtonData("🎥 Видеооператор", "order_spec_videographer"),
             tgbotapi.NewInlineKeyboardButtonData("📸 Фотограф", "order_spec_photographer"),
+        },
+        {
+            tgbotapi.NewInlineKeyboardButtonData("🖌️ Motion Дизайнер", "order_spec_motion_designer"),
+            tgbotapi.NewInlineKeyboardButtonData("🎨 Графический Дизайнер", "order_spec_graph_designer"),        
         },
     }
     keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
@@ -355,7 +362,12 @@ func (tg *TgBot) handlePortfolioInput(message *tgbotapi.Message) {
             tgbotapi.NewInlineKeyboardButtonData("🎥 Видеооператор", "specialization_videographer"),
             tgbotapi.NewInlineKeyboardButtonData("📸 Фотограф", "specialization_photographer"),
         },
+        {
+            tgbotapi.NewInlineKeyboardButtonData("🖌️ Motion Дизайнер", "specialization_motion_designer"),
+            tgbotapi.NewInlineKeyboardButtonData("🎨 Графический Дизайнер", "specialization_graphic_designer"),
+        },
     }
+
     keyboard := tgbotapi.NewInlineKeyboardMarkup(buttons...)
 
     response := tgbotapi.NewMessage(chatID, specMsg)
@@ -589,17 +601,16 @@ func (tg *TgBot) handleOrderSpecializationSelection(chatID int64, data string) {
         return
     }
 
-    // Set specialization based on selection
     order.Specialization = map[string]string{
         "order_spec_videographer": "Видеооператор",
         "order_spec_photographer": "Фотограф",
+        "order_spec_motion_designer": "Motion Дизайнер",
+        "order_spec_graph_designer": "Графический Дизайнер",
     }[data]
 
-    // Move to next state
     tg.userStates[chatID] = StateEnteringOrderTitle
     tg.stateMutex.Unlock()
 
-    // Prompt for order title
     msg := `📝 Отлично! Теперь введите название заказа:
 Например: "Свадебная фотосессия" или "Видеосъёмка дня рождения"`
 
