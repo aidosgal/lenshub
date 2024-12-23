@@ -486,6 +486,20 @@ func (tg *TgBot) notifyExecutors(order *model.Order) {
     }
 }
 
+func escapeMarkdown(text string) string {
+    // Escape Telegram Markdown special characters
+    replacer := strings.NewReplacer(
+        "_", "\\_",
+        "*", "\\*",
+        "[", "\\[",
+        "]", "\\]",
+        "(", "\\(",
+        ")", "\\)",
+        "`", "\\`",
+    )
+    return replacer.Replace(text)
+}
+
 func (tg *TgBot) handleOrderResponse(chatID int64, orderID string) {
     log.Printf("Starting to handle order response for chatID: %d, orderID: %s", chatID, orderID)
 
@@ -540,6 +554,9 @@ func (tg *TgBot) handleOrderResponse(chatID int64, orderID string) {
     }
     log.Printf("Successfully converted customer chatID to: %d", customerChatID)
 
+    // Escape the username to handle Telegram Markdown formatting
+    escapedUserName := escapeMarkdown(executor.UserName)
+
     // Prepare and send executor's profile to customer
     log.Printf("Preparing notification message for customer with chatID: %d", customerChatID)
     profileText := fmt.Sprintf(`🔔 Новый отклик на ваш заказ *"%s"*!
@@ -549,11 +566,11 @@ func (tg *TgBot) handleOrderResponse(chatID int64, orderID string) {
 👤 *Имя:* %s
 🔍 *Username:* @%s
 🎯 *Специализация:* %s`, 
-        order.Title,
-        executor.Role,
-        executor.Name,
-        executor.UserName,
-        executor.Specialization,
+        escapeMarkdown(order.Title),
+        escapeMarkdown(executor.Role),
+        escapeMarkdown(executor.Name),
+        escapedUserName,
+        escapeMarkdown(executor.Specialization),
     )
 
     buttons := [][]tgbotapi.InlineKeyboardButton{
@@ -574,6 +591,7 @@ func (tg *TgBot) handleOrderResponse(chatID int64, orderID string) {
     }
     log.Printf("Successfully sent notification to customer about new response")
 }
+
 
 func (tg *TgBot) handleOrderSpecializationSelection(chatID int64, data string) {
     tg.stateMutex.Lock()
@@ -603,3 +621,16 @@ func (tg *TgBot) handleOrderSpecializationSelection(chatID int64, data string) {
     tg.bot.Send(response)
 }
 
+func escapeMarkdown(text string) string {
+    // Escape Telegram Markdown special characters
+    replacer := strings.NewReplacer(
+        "_", "\\_",
+        "*", "\\*",
+        "[", "\\[",
+        "]", "\\]",
+        "(", "\\(",
+        ")", "\\)",
+        "`", "\\`",
+    )
+    return replacer.Replace(text)
+}
