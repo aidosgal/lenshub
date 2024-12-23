@@ -486,20 +486,6 @@ func (tg *TgBot) notifyExecutors(order *model.Order) {
     }
 }
 
-func escapeMarkdown(text string) string {
-    // Escape Telegram Markdown special characters
-    replacer := strings.NewReplacer(
-        "_", "\\_",
-        "*", "\\*",
-        "[", "\\[",
-        "]", "\\]",
-        "(", "\\(",
-        ")", "\\)",
-        "`", "\\`",
-    )
-    return replacer.Replace(text)
-}
-
 func (tg *TgBot) handleOrderResponse(chatID int64, orderID string) {
     log.Printf("Starting to handle order response for chatID: %d, orderID: %s", chatID, orderID)
 
