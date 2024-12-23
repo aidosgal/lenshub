@@ -545,7 +545,7 @@ func (tg *TgBot) handleOrderResponse(chatID int64, orderID string) {
 
     // Prepare and send executor's profile to customer
     log.Printf("Preparing notification message for customer with chatID: %d", customerChatID)
-    profileText := fmt.Sprintf(`🔔 Новый отклик на ваш заказ *"%s"*!
+    profileText := fmt.Sprintf(`🔔 Новый отклик на ваш заказ *"%s"*, теперь вы можете связаться с исполнителем напрямую!
 
 👤 *Профиль исполнителя:*
 📸 *Роль:* %s
